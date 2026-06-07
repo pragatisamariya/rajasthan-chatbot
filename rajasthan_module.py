@@ -1,3 +1,48 @@
+from langchain_community.document_loaders import TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_groq import ChatGroq
+import requests
+import os
+
+
+loader = TextLoader("rajasthan.txt")
+documents = loader.load()
+
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=50
+)
+
+docs = text_splitter.split_documents(documents)
+
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+vectorstore = FAISS.from_documents(docs, embeddings)
+retriever = vectorstore.as_retriever()
+
+llm = ChatGroq(
+    model_name="llama-3.1-8b-instant",
+    temperature=0
+)
+
+API_KEY = os.getenv("WEATHERSTACK_API_KEY")
+
+def get_weather(city):
+    url = f"http://api.weatherstack.com/current?access_key={API_KEY}&query={city}"
+    response = requests.get(url)
+    data = response.json()
+
+    if "current" in data:
+        temp = data["current"]["temperature"]
+        desc = data["current"]["weather_descriptions"][0]
+        humidity = data["current"]["humidity"]
+        return f"The current weather in {city} is {desc}, temperature is {temp}°C, humidity is {humidity}%."
+    else:
+        return f"Sorry, I couldn't fetch the weather for {city}."
 conversation_history = []
 def ask_rajasthan(question):
     global conversation_history
