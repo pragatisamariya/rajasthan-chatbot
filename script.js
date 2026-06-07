@@ -8,7 +8,7 @@ async function sendMessage() {
     inputField.value = "";
 
     try {
-        const response = await fetch("https://lubricational-cagily-khalil.ngrok-free.dev/chat", {
+        const response = await fetch("https://rajasthan-chatbot.onrender.com/chat", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
