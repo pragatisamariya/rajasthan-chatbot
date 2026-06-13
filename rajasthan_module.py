@@ -31,9 +31,7 @@ def get_weather(city):
         print("ERROR:", e)
         return f"The current weather in {city} is Sunny, temperature is 32°C."
 
-except Exception as e:
-    print("ERROR:", e)
-    return f"The current weather in {city} is Sunny, temperature is 32°C."
+
 conversation_history = []
 def ask_rajasthan(question):
     global conversation_history
