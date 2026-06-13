@@ -110,16 +110,16 @@ City detected: {detected_city if detected_city else "Not specified"}
         return response.content
 
 
-  # ---------------- KNOWLEDGE ----------------
+    # ---------------- KNOWLEDGE ----------------
 
-with open("rajasthan.txt", "r", encoding="utf-8") as file:
-    context = file.read()
+    with open("rajasthan.txt", "r", encoding="utf-8") as file:
+        context = file.read()
 
-history_text = "\n".join(
-    [f"{msg['role']}: {msg['content']}" for msg in conversation_history]
-)
+    history_text = "\n".join(
+        [f"{msg['role']}: {msg['content']}" for msg in conversation_history]
+    )
 
-final_prompt = f"""
+    final_prompt = f"""
 You are a friendly Rajasthan Tourism AI Assistant.
 
 Conversation so far:
@@ -137,7 +137,9 @@ Question:
 {question}
 """
 
-response = llm.invoke(final_prompt)
-conversation_history.append({"role": "assistant", "content": response.content})
+    response = llm.invoke(final_prompt)
+    conversation_history.append(
+        {"role": "assistant", "content": response.content}
+    )
 
-return response.content
+    return response.content
