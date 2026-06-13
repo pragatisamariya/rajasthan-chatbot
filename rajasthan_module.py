@@ -1,28 +1,10 @@
-from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
+
 from langchain_groq import ChatGroq
 import requests
 import os
 
 
-loader = TextLoader("rajasthan.txt")
-documents = loader.load()
 
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=50
-)
-
-docs = text_splitter.split_documents(documents)
-
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
-
-vectorstore = FAISS.from_documents(docs, embeddings)
-retriever = vectorstore.as_retriever()
 
 llm = ChatGroq(
     model_name="llama-3.1-8b-instant",
@@ -128,32 +110,34 @@ City detected: {detected_city if detected_city else "Not specified"}
         return response.content
 
 
-    # ---------------- RAG KNOWLEDGE ----------------
-    retrieved_docs = retriever.invoke(question)
-    context = "\n\n".join([doc.page_content for doc in retrieved_docs])
+  # ---------------- KNOWLEDGE ----------------
 
-    history_text = "\n".join(
-        [f"{msg['role']}: {msg['content']}" for msg in conversation_history]
-    )
+with open("rajasthan.txt", "r", encoding="utf-8") as file:
+    context = file.read()
 
-    final_prompt = f"""
+history_text = "\n".join(
+    [f"{msg['role']}: {msg['content']}" for msg in conversation_history]
+)
+
+final_prompt = f"""
 You are a friendly Rajasthan Tourism AI Assistant.
 
 Conversation so far:
 {history_text}
 
-Answer ONLY using the provided context.
+Answer ONLY using the provided Rajasthan knowledge.
+
 If information is not found, say:
 "I don't have that information in my Rajasthan guide."
 
-Context:
+Knowledge:
 {context}
 
 Question:
 {question}
 """
 
-    response = llm.invoke(final_prompt)
-    conversation_history.append({"role": "assistant", "content": response.content})
+response = llm.invoke(final_prompt)
+conversation_history.append({"role": "assistant", "content": response.content})
 
-    return response.content
+return response.content
